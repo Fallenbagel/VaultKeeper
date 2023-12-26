@@ -27,7 +27,7 @@ jobs:
           files: |
             target/release/vaultkeeper_amd64
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   build-win:
     runs-on: windows-latest
@@ -52,7 +52,7 @@ jobs:
         with:
           files: target/release/vaultkeeper.exe
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   build-mac:
     runs-on: macos-latest
@@ -79,4 +79,4 @@ jobs:
           files: |
             target/release/vaultkeeper_darwin
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
