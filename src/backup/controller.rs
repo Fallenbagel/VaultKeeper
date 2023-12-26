@@ -1,4 +1,4 @@
-use color_eyre::eyre::eyre;
+use color_eyre::{eyre::eyre, Section, SectionExt};
 use tracing::{error, info};
 
 use super::{
@@ -11,7 +11,11 @@ use crate::utils::Config;
 
 pub fn perform_backups(config: &Config) -> Result<(), color_eyre::Report> {
     if check_dirs_exist(config).is_err() {
-        return Err(eyre!("Source and/or backup directories are empty"));
+        return Err(eyre!("Source and/or backup directories are empty"))
+            .with_warning(|| {
+                "Please make sure you have set the source and backup directories correctly in config.json"
+            })
+            .with_section(|| {format!("source_dir: \"{}\"\nbackup_dir: \"{}\"", config.source_dir, config.backup_dir).header("config.json")});
     }
 
     let backup_dir = create_backup_dir(config)?;

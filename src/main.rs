@@ -13,9 +13,7 @@ mod utils;
     version = env!("CARGO_PKG_VERSION"),
     about = "Backs up a Vaultwarden instance with optional selective backups"
 )]
-#[command(
-    help_template = "{name}\n{author-with-newline}{about-section}\n{usage-heading} {usage}\n\n{all-args} {tab}"
-)]
+
 struct Cli {
     /// Run backup
     #[command(subcommand)]
