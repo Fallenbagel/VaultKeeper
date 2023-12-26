@@ -22,6 +22,7 @@
             gcc
             cmake
             pkg-config
+            convco
             (rust-bin.stable."1.74.1".default.override {
               extensions = [ "rust-src" "rustc" "cargo" "clippy" "rustfmt" "rust-analyzer"];
               targets = [ "x86_64-unknown-linux-gnu"];
