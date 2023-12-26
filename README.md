@@ -46,7 +46,7 @@ To get started with VaultKeeper, follow these steps:
     ```
 #### Manual Installation
 1. Download and Install:
-   - Visit the [releases](https://github.com/Fallenbagel/VaultKeeper/releases/latest/download/vaultkeeper) page.
+   - Visit the ([releases](https://github.com/Fallenbagel/VaultKeeper/releases/latest)) page.
    - Download the latest version of VaultKeeper for your platform (windows coming soon™)
 2. Make the binary executable (Linux/Unix/Mac):
     ```bash
