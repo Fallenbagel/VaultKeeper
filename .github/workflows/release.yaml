@@ -13,11 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Generate changelog
-        id: gen_changelog
-        uses: bdashrad/git-chglog-action@v2.0.3
+      - name: "Generate release changelog"
+        uses: heinrichreimer/action-github-changelog-generator@v2.3
         with:
-          next_version: "1.0.0"
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: taiki-e/create-gh-release-action@v1
         with:
           changelog: CHANGELOG.md
