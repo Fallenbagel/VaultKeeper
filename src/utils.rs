@@ -78,7 +78,7 @@ fn read_config_from_path(config_path: &PathBuf) -> Result<Config, Error> {
 
 pub fn generate_config(config_path: &PathBuf) -> Result<Config, SerdeJsonError> {
     let config = Config::new();
-    let _ = write_config(&config, config_path);
+    let _ = write_config(&config, &config_path);
     Ok(config)
 }
 
