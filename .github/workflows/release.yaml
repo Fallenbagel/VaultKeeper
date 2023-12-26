@@ -16,7 +16,7 @@ jobs:
       - name: "Generate release changelog"
         uses: heinrichreimer/action-github-changelog-generator@v2.3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
       - uses: taiki-e/create-gh-release-action@v1
         with:
           changelog: CHANGELOG.md
