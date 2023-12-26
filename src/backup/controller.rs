@@ -1,4 +1,4 @@
-use color_eyre::{eyre::eyre, Section};
+use color_eyre::eyre::eyre;
 use tracing::{error, info};
 
 use super::{
