@@ -13,10 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: "Generate release changelog"
-        uses: heinrichreimer/action-github-changelog-generator@v2.3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
+      - name: Install Convco
+        run: |
+          curl -OL https://github.com/convco/convco/releases/latest/download/convco-deb.zip
+          unzip convco-deb.zip
+          sudo dpkg -i convco*.deb
+        shell: bash
+      - name: Generate Changelog
+        run: convco changelog > CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - uses: taiki-e/create-gh-release-action@v1
         with:
           changelog: CHANGELOG.md
