@@ -4,11 +4,12 @@ use std::{
     process::Command,
 };
 
-use log::{debug, error, info};
+use color_eyre::eyre::eyre;
+use tracing::{debug, error, info};
 
 use crate::utils::Config;
 
-pub fn backup_rsa_keys(config: &Config, backup_dir: &Path) -> Result<(), String> {
+pub fn backup_rsa_keys(config: &Config, backup_dir: &Path) -> Result<(), color_eyre::Report> {
     info!("Backing up RSA keys");
 
     let source_dir = PathBuf::from(&config.source_dir);
@@ -49,14 +50,14 @@ pub fn backup_rsa_keys(config: &Config, backup_dir: &Path) -> Result<(), String>
         .args(&key_strings)
         .arg(backup_files)
         .output()
-        .map_err(|e| format!("Failed to execute rsync: {}", e))?;
+        .map_err(|e| eyre!("Failed to execute rsync: {}", e))?;
 
     if output.status.success() {
         info!("RSA keys backed up");
         Ok(())
     } else {
         error!("Failed to backup RSA keys. rsync output: {:?}", output);
-        Err(format!(
+        Err(eyre!(
             "Failed to backup RSA keys. rsync output: {:?}",
             output
         ))

@@ -1,12 +1,11 @@
-use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
-use serde_json::Error as SerdeJsonError;
 use std::{
     env,
     fs::File,
-    io::{BufReader, Error, Write},
+    io::{BufReader, Write},
     path::PathBuf,
 };
+use tracing::{debug, info, warn};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -37,7 +36,7 @@ impl Config {
     }
 }
 
-pub fn read_config(args: Option<PathBuf>) -> Result<Config, SerdeJsonError> {
+pub fn read_config(args: Option<PathBuf>) -> Result<Config, color_eyre::Report> {
     if let Some(config_path) = args {
         let config_file_path = config_path.join("config.json");
         match read_config_from_path(&config_file_path) {
@@ -47,7 +46,6 @@ pub fn read_config(args: Option<PathBuf>) -> Result<Config, SerdeJsonError> {
             }
             Err(_) => {
                 warn!("No config file found, creating one with default values");
-                let config_file_path = config_path.join("config.json");
                 generate_config(&config_file_path)
             }
         }
@@ -68,7 +66,7 @@ pub fn read_config(args: Option<PathBuf>) -> Result<Config, SerdeJsonError> {
     }
 }
 
-fn read_config_from_path(config_path: &PathBuf) -> Result<Config, Error> {
+fn read_config_from_path(config_path: &PathBuf) -> Result<Config, color_eyre::Report> {
     let file = File::open(config_path)?;
     let reader = BufReader::new(file);
     let config: Config = serde_json::from_reader(reader)?;
@@ -76,13 +74,13 @@ fn read_config_from_path(config_path: &PathBuf) -> Result<Config, Error> {
     Ok(config)
 }
 
-pub fn generate_config(config_path: &PathBuf) -> Result<Config, SerdeJsonError> {
+pub fn generate_config(config_path: &PathBuf) -> Result<Config, color_eyre::Report> {
     let config = Config::new();
     let _ = write_config(&config, config_path);
     Ok(config)
 }
 
-fn write_config(config: &Config, config_path: &PathBuf) -> Result<(), Error> {
+fn write_config(config: &Config, config_path: &PathBuf) -> Result<(), color_eyre::Report> {
     let json = serde_json::to_string_pretty(config)?;
     let mut file = File::create(config_path).expect("Could not create config file");
 

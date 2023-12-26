@@ -1,10 +1,11 @@
 use std::{path::Path, process::Command};
 
-use log::{error, info};
+use color_eyre::eyre::eyre;
+use tracing::{error, info};
 
 use crate::utils::Config;
 
-pub fn backup_database(config: &Config, backup_dir: &Path) -> Result<(), String> {
+pub fn backup_database(config: &Config, backup_dir: &Path) -> Result<(), color_eyre::Report> {
     info!("Backing up database");
 
     let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S");
@@ -16,14 +17,14 @@ pub fn backup_database(config: &Config, backup_dir: &Path) -> Result<(), String>
         .arg(format!(".backup {:?}", backup_file))
         .current_dir(&config.source_dir)
         .output()
-        .map_err(|e| format!("Failed to execute sqlite3: {}", e))?;
+        .map_err(|e| eyre!("Failed to execute sqlite3: {}", e))?;
 
     if output.status.success() {
         info!("Database backed up");
         Ok(())
     } else {
         error!("Failed to backup database. sqlite3 output: {:?}", output);
-        Err(format!(
+        Err(eyre!(
             "Failed to backup database. sqlite3 output: {:?}",
             output
         ))

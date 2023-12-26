@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use env_logger::{Builder, Env};
-use log::{info, warn};
+use tracing::{info, instrument, warn};
 
 mod backup;
+mod diagnostics;
 mod utils;
 
 #[derive(Debug, Parser)]
@@ -35,18 +35,15 @@ enum Commands {
 }
 
 impl Commands {
-    fn run(&self, args: Option<PathBuf>) {
+    #[instrument(skip(self, args))]
+    fn run(&self, args: Option<PathBuf>) -> Result<(), color_eyre::Report> {
         match self {
             Commands::Backup => {
-                Builder::from_env(Env::default().default_filter_or("info"))
-                    .format_timestamp_secs()
-                    .init();
-
                 info!("Application starting up...");
 
-                let config = utils::read_config(args).unwrap();
+                let config = utils::read_config(args)?;
 
-                backup::controller::perform_backups(&config).unwrap();
+                backup::controller::perform_backups(&config)?;
 
                 if config.backup_db
                     || config.backup_attachments
@@ -61,23 +58,22 @@ impl Commands {
                 }
 
                 info!("Application finished");
+                Ok(())
             }
             Commands::GenerateConfig => {
-                Builder::from_env(Env::default().default_filter_or("info"))
-                    .format_timestamp_secs()
-                    .init();
-
                 info!("Application starting up...");
 
-                let config = utils::read_config(args);
+                let _config = utils::read_config(args)?;
 
-                config.unwrap();
+                Ok(())
             }
         }
     }
 }
 
-fn main() {
+fn main() -> Result<(), color_eyre::Report> {
+    diagnostics::setup()?;
     let cli = Cli::parse();
-    cli.command.run(cli.config);
+    cli.command.run(cli.config)?;
+    Ok(())
 }

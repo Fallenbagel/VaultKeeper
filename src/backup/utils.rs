@@ -3,11 +3,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{info, warn};
+use color_eyre::eyre::Context;
+use tracing::{info, warn};
 
 use crate::utils::Config;
 
-pub fn create_backup_dir(config: &Config) -> PathBuf {
+pub fn create_backup_dir(config: &Config) -> Result<PathBuf, color_eyre::Report> {
     info!("Creating backup directory");
     let timestamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
 
@@ -19,13 +20,14 @@ pub fn create_backup_dir(config: &Config) -> PathBuf {
         || config.backup_icon_cache
         || config.backup_sends
     {
-        create_dir_all(&backup_path).expect("Could not create backup directory");
+        create_dir_all(&backup_path)
+            .wrap_err_with(|| format!("Failed to create backup directory: {:?}", backup_path))?;
         info!("Backup directory created: {:?}", backup_path);
     } else {
         warn!("Backup directory not created");
     }
 
-    backup_path
+    Ok(backup_path)
 }
 
 pub fn manage_backups(config: &Config) {
