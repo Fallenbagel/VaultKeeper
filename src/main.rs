@@ -1,11 +1,7 @@
-use std::{env, os::unix::process, path::PathBuf};
+use std::{env, path::PathBuf};
 
 use clap::{Parser, Subcommand};
-use color_eyre::{
-    eyre::{eyre, Context},
-    Section,
-};
-use serde::de;
+
 use sysops::scheduler::ActivationTime;
 use tracing::{info, instrument, warn};
 
