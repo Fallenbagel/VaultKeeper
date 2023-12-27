@@ -1,5 +1,5 @@
 use color_eyre::{eyre::eyre, Section, SectionExt};
-use tracing::{error, info};
+use tracing::{debug, error};
 
 use super::{
     attachments::backup_attachments, config_file::backup_config_file, database::backup_database,
@@ -21,32 +21,32 @@ pub fn perform_backups(config: &Config) -> Result<(), color_eyre::Report> {
     let backup_dir = create_backup_dir(config)?;
 
     if config.backup_db {
-        info!("Backing up database");
+        debug!("Backing up database");
         backup_database(config, &backup_dir)?;
     }
 
     if config.backup_attachments {
-        info!("Backing up attachments");
+        debug!("Backing up attachments");
         backup_attachments(config, &backup_dir)?;
     }
 
     if config.backup_config {
-        info!("Backing up config file");
+        debug!("Backing up config file");
         backup_config_file(config, &backup_dir)?;
     }
 
     if config.backup_rsa_keys {
-        info!("Backing up RSA keys");
+        debug!("Backing up RSA keys");
         backup_rsa_keys(config, &backup_dir)?;
     }
 
     if config.backup_icon_cache {
-        info!("Backing up icon cache");
+        debug!("Backing up icon cache");
         backup_icon_cache(config, &backup_dir)?;
     }
 
     if config.backup_sends {
-        info!("Backing up sends");
+        debug!("Backing up sends");
         backup_sends(config, &backup_dir)?;
     }
 

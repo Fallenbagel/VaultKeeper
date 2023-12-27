@@ -1,0 +1,9 @@
+[Unit]
+Description=vaultkeeper service to run backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/vaultkeeper backup --config "/home/fallenbagel/code/vaultkeeper/config.json"
+
+[Install]
+WantedBy=multi-user.target

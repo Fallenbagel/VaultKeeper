@@ -1,10 +1,17 @@
-use std::path::PathBuf;
+use std::{env, os::unix::process, path::PathBuf};
 
 use clap::{Parser, Subcommand};
+use color_eyre::{
+    eyre::{eyre, Context},
+    Section,
+};
+use serde::de;
+use sysops::scheduler::ActivationTime;
 use tracing::{info, instrument, warn};
 
 mod backup;
 mod diagnostics;
+mod sysops;
 mod utils;
 
 #[derive(Debug, Parser)]
@@ -30,16 +37,31 @@ enum Commands {
     Backup,
     /// Generate config file with default values.
     GenerateConfig,
+    /// Systemd timer to run backup
+    #[cfg(target_os = "linux")]
+    Install {
+        /// Install systemd service and timer files for scheduled backups
+        #[arg(short, long, value_name = "HH:MM or daily")]
+        schedule: ActivationTime,
+
+        /// generate systemd service and timer files in current directory
+        #[arg(short, long)]
+        manual: Option<bool>,
+
+        /// Install binary to user's PATH
+        #[arg(short, long)]
+        binary: Option<bool>,
+    },
 }
 
 impl Commands {
     #[instrument(skip(self, args))]
-    fn run(&self, args: Option<PathBuf>) -> Result<(), color_eyre::Report> {
+    fn run(&self, args: &Option<PathBuf>) -> Result<(), color_eyre::Report> {
         match self {
             Commands::Backup => {
                 info!("Application starting up...");
 
-                let config = utils::read_config(args)?;
+                let (config, _config_path) = utils::read_config(&args)?;
 
                 backup::controller::perform_backups(&config)?;
 
@@ -59,9 +81,33 @@ impl Commands {
                 Ok(())
             }
             Commands::GenerateConfig => {
-                info!("Application starting up...");
+                info!("Generating Config...");
 
-                let _config = utils::read_config(args)?;
+                let _config = utils::read_config(&args)?;
+
+                Ok(())
+            }
+            #[cfg(target_os = "linux")]
+            Commands::Install {
+                schedule,
+                manual,
+                binary,
+            } => {
+                if binary.unwrap_or(false) {
+                    info!("Installing binary...");
+                    sysops::installer::install_binary()?;
+                }
+
+                info!("Setting up systemd service and timer files...");
+
+                let (_config, mut config_path) = utils::read_config(&args)?;
+
+                if !manual.unwrap_or(false) {
+                    config_path = PathBuf::from("/etc/vaultkeeper/config.json");
+                }
+
+                sysops::scheduler::create_systemd_service(&manual, &config_path)?;
+                sysops::scheduler::create_systemd_timer(schedule, manual)?;
 
                 Ok(())
             }
@@ -72,6 +118,6 @@ impl Commands {
 fn main() -> Result<(), color_eyre::Report> {
     diagnostics::setup()?;
     let cli = Cli::parse();
-    cli.command.run(cli.config)?;
+    cli.command.run(&cli.config)?;
     Ok(())
 }

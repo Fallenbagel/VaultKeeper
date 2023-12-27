@@ -845,6 +845,7 @@ dependencies = [
  "clap-nested",
  "color-eyre",
  "env_logger",
+ "regex",
  "serde",
  "serde_json",
  "time",

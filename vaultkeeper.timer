@@ -1,0 +1,10 @@
+[Unit]
+Description=vaultkeeper timer to run backup
+
+[Timer]
+OnCalendar=*-*-* 16:00
+Unit=vaultkeeper
+Persistent=true
+
+[Install]
+WantedBy=timers.target

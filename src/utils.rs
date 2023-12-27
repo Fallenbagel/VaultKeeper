@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use std::{
     env,
     fs::File,
@@ -36,13 +36,13 @@ impl Config {
     }
 }
 
-pub fn read_config(args: Option<PathBuf>) -> Result<Config, color_eyre::Report> {
+pub fn read_config(args: &Option<PathBuf>) -> Result<(Config, PathBuf), color_eyre::Report> {
     if let Some(config_path) = args {
         let config_file_path = config_path.join("config.json");
         match read_config_from_path(&config_file_path) {
             Ok(config) => {
                 info!("Config file found. Using values from config file");
-                Ok(config)
+                Ok((config, config_file_path))
             }
             Err(_) => {
                 warn!("No config file found, creating one with default values");
@@ -56,7 +56,7 @@ pub fn read_config(args: Option<PathBuf>) -> Result<Config, color_eyre::Report> 
         match read_config_from_path(&config_path) {
             Ok(config) => {
                 info!("Config file found. Using values from config file");
-                Ok(config)
+                Ok((config, config_path))
             }
             Err(_) => {
                 warn!("No config file found, creating one with default values");
@@ -66,7 +66,7 @@ pub fn read_config(args: Option<PathBuf>) -> Result<Config, color_eyre::Report> 
     }
 }
 
-fn read_config_from_path(config_path: &PathBuf) -> Result<Config, color_eyre::Report> {
+pub fn read_config_from_path(config_path: &PathBuf) -> Result<Config, color_eyre::Report> {
     let file = File::open(config_path)?;
     let reader = BufReader::new(file);
     let config: Config = serde_json::from_reader(reader)?;
@@ -74,10 +74,10 @@ fn read_config_from_path(config_path: &PathBuf) -> Result<Config, color_eyre::Re
     Ok(config)
 }
 
-pub fn generate_config(config_path: &PathBuf) -> Result<Config, color_eyre::Report> {
+pub fn generate_config(config_path: &PathBuf) -> Result<(Config, PathBuf), color_eyre::Report> {
     let config = Config::new();
     let _ = write_config(&config, config_path);
-    Ok(config)
+    Ok((config, config_path.to_path_buf()))
 }
 
 fn write_config(config: &Config, config_path: &PathBuf) -> Result<(), color_eyre::Report> {
