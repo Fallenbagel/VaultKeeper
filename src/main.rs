@@ -1,4 +1,8 @@
-use std::{env, path::PathBuf};
+use std::{
+    env,
+    path::PathBuf,
+    fs::create_dir_all
+};
 
 use clap::{Parser, Subcommand};
 
@@ -23,7 +27,13 @@ struct Cli {
     command: Commands,
 
     /// Specify a custom path to generate/read the config file
-    #[arg(short, long, value_name = "PATH", global = true)]
+    #[arg(
+        short,
+        long,
+        value_name = "PATH",
+        global = true,
+        default_value = "/etc/vaultkeeper"
+    )]
     config: Option<PathBuf>,
 }
 
@@ -57,9 +67,10 @@ impl Commands {
             Commands::Backup => {
                 info!("Application starting up...");
 
-                let (config, _config_path) = utils::read_config(&args)?;
+                let (config, config_path) = utils::read_config(&args)?;
+                dbg!(utils::read_config(args))?;
 
-                backup::controller::perform_backups(&config)?;
+                backup::controller::perform_backups(&config, &config_path)?;
 
                 if config.backup_db
                     || config.backup_attachments
@@ -94,12 +105,14 @@ impl Commands {
                     sysops::installer::install_binary()?;
                 }
 
-                info!("Setting up systemd service and timer files...");
+                info!("Setting up config file, systemd service and timer files...");
+
+                create_dir_all(&args.as_ref().unwrap())?;
 
                 let (_config, mut config_path) = utils::read_config(&args)?;
 
                 if !manual.unwrap_or(false) {
-                    config_path = PathBuf::from("/etc/vaultkeeper/config.json");
+                    config_path = PathBuf::from(&args.as_ref().unwrap().join("config.json"));
                 }
 
                 sysops::scheduler::create_systemd_service(&manual, &config_path)?;

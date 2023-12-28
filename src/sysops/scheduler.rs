@@ -153,7 +153,7 @@ fn check_config_exists() -> Result<(), color_eyre::Report> {
     Ok(())
 }
 
-fn check_binary_exists() -> Result<(), color_eyre::Report> {
+pub fn check_binary_exists() -> Result<(), color_eyre::Report> {
     let binary_name = env!("CARGO_PKG_NAME");
     let paths = std::env::var("PATH").unwrap();
     for path in paths.split(':') {
