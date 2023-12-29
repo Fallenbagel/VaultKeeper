@@ -67,7 +67,7 @@ impl Commands {
             Commands::Backup => {
                 info!("Application starting up...");
 
-                let (config, config_path) = utils::read_config(&args)?;
+                let (config, config_path) = utils::read_config(args)?;
                 dbg!(utils::read_config(args))?;
 
                 backup::controller::perform_backups(&config, &config_path)?;
@@ -90,7 +90,7 @@ impl Commands {
             Commands::GenerateConfig => {
                 info!("Generating Config...");
 
-                let _config = utils::read_config(&args)?;
+                let _config = utils::read_config(args)?;
 
                 Ok(())
             }
@@ -107,15 +107,15 @@ impl Commands {
 
                 info!("Setting up config file, systemd service and timer files...");
 
-                create_dir_all(&args.as_ref().unwrap())?;
+                create_dir_all(args.as_ref().unwrap())?;
 
-                let (_config, mut config_path) = utils::read_config(&args)?;
+                let (_config, mut config_path) = utils::read_config(args)?;
 
                 if !manual.unwrap_or(false) {
                     config_path = PathBuf::from(&args.as_ref().unwrap().join("config.json"));
                 }
 
-                sysops::scheduler::create_systemd_service(&manual, &config_path)?;
+                sysops::scheduler::create_systemd_service(manual, &config_path)?;
                 sysops::scheduler::create_systemd_timer(schedule, manual)?;
 
                 Ok(())

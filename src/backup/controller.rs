@@ -1,7 +1,4 @@
-use std::{
-    path::PathBuf,
-    fs
-};
+use std::{fs, path::PathBuf};
 
 use color_eyre::{eyre::eyre, Section, SectionExt};
 use tracing::debug;
@@ -69,9 +66,7 @@ pub fn perform_backups(config: &Config, config_path: &PathBuf) -> Result<(), col
 
 fn check_dirs_exist(config: &Config, config_path: &PathBuf) -> Result<(), color_eyre::Report> {
     if config.source_dir.is_empty() {
-        let empty_character_pos = line_number_and_column_detect(config_path)?;
-        dbg!(empty_character_pos);
-        return Err(eyre!("Source directory does not exist")
+        return Err(eyre!("Source directory is empty")
             .with_suggestion(|| {
                 {
                     format!("Set the source directories correctly in {:?}", config_path)
@@ -104,22 +99,22 @@ fn check_dirs_exist(config: &Config, config_path: &PathBuf) -> Result<(), color_
     Ok(())
 }
 
-fn line_number_and_column_detect(
-    config_path: &PathBuf,
-) -> Result<EmptyCharacterPos, color_eyre::Report> {
-    let config_json = fs::read_to_string(config_path)?;
+// fn line_number_and_column_detect(
+//     config_path: &PathBuf,
+// ) -> Result<EmptyCharacterPos, color_eyre::Report> {
+//     let config_json = fs::read_to_string(config_path)?;
 
-    let line = 0;
-    let col = 0;
+//     let line = 0;
+//     let col = 0;
 
-    if let Some(idx) = config_json.find(":") {
-        if let Some(idx2) = config_json[idx + 2..].find("\"\"") {
-            let line = config_json[..idx].matches('\n').count() + 1;
-            let col = idx + idx2 + 2;
+//     if let Some(idx) = config_json.find(':') {
+//         if let Some(idx2) = config_json[idx + 2..].find("\"\"") {
+//             let line = config_json[..idx].matches('\n').count() + 1;
+//             let col = idx + idx2 + 2;
 
-            println!("Empty source_dir at line {} column {}", line, col);
-        }
-    }
+//             println!("Empty source_dir at line {} column {}", line, col);
+//         }
+//     }
 
-    Ok(EmptyCharacterPos(line, col))
-}
+//     Ok(EmptyCharacterPos(line, col))
+// }
